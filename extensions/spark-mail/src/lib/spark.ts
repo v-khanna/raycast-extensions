@@ -20,23 +20,30 @@ const BASE_PATH = [
 
 const CLI_ENV: NodeJS.ProcessEnv = { ...process.env, PATH: BASE_PATH };
 
-interface Preferences {
-  sparkPath?: string;
+/** Look for a `spark` executable in each directory on BASE_PATH. */
+function resolveSparkOnPath(): string | null {
+  for (const dir of BASE_PATH.split(":")) {
+    if (!dir) continue;
+    const candidate = `${dir}/spark`;
+    if (existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+/** The configured `spark` path, if any (a non-empty preference value). */
+function sparkPathPreference(): string | undefined {
+  return getPreferenceValues<Preferences>().sparkPath?.trim() || undefined;
 }
 
 /** Absolute path to the `spark` binary (preference wins, else common defaults). */
 export function getSparkPath(): string {
-  const pref = getPreferenceValues<Preferences>().sparkPath?.trim();
-  if (pref) return pref;
-  for (const candidate of ["/usr/local/bin/spark", "/opt/homebrew/bin/spark"]) {
-    if (existsSync(candidate)) return candidate;
-  }
-  return "spark";
+  return sparkPathPreference() ?? resolveSparkOnPath() ?? "spark";
 }
 
 export function isSparkInstalled(): boolean {
-  const path = getSparkPath();
-  return path === "spark" ? true : existsSync(path);
+  const pref = sparkPathPreference();
+  if (pref) return existsSync(pref);
+  return resolveSparkOnPath() !== null;
 }
 
 /** A user-facing error whose message is already safe to show in a toast. */

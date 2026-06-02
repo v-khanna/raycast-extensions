@@ -25,7 +25,7 @@ interface DraftForm {
 
 const splitAddresses = (raw: string): string[] =>
   raw
-    .split(/[,\s]+/)
+    .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 
