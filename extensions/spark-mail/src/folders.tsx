@@ -7,7 +7,10 @@ import { getSparkPath, isSparkInstalled, parseFolders } from "./lib/spark";
 
 export default function Folders() {
   if (!isSparkInstalled()) return <SparkNotInstalled />;
+  return <FoldersView />;
+}
 
+function FoldersView() {
   const { data, isLoading, error } = useExec(getSparkPath(), ["folders"], {
     keepPreviousData: true,
   });

@@ -15,7 +15,10 @@ const PAGE_SIZE = 50;
 
 export default function Inbox() {
   if (!isSparkInstalled()) return <SparkNotInstalled />;
+  return <InboxView />;
+}
 
+function InboxView() {
   const [view, setView] = useState("");
   const { hasTriage } = useAccounts();
 

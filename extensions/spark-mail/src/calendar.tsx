@@ -17,7 +17,10 @@ const RANGES = [
 
 export default function Calendar() {
   if (!isSparkInstalled()) return <SparkNotInstalled />;
+  return <CalendarView />;
+}
 
+function CalendarView() {
   const [range, setRange] = useState("--week");
 
   const { data, isLoading, error } = useExec(

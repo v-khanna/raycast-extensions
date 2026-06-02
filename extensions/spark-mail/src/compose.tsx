@@ -31,7 +31,10 @@ const splitAddresses = (raw: string): string[] =>
 
 export default function Compose() {
   if (!isSparkInstalled()) return <SparkNotInstalled />;
+  return <ComposeView />;
+}
 
+function ComposeView() {
   const { triageAccounts, isLoading } = useAccounts();
   if (!isLoading && triageAccounts.length === 0) {
     return <NoTriageAccess />;

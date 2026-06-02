@@ -7,7 +7,10 @@ import { getSparkPath, isSparkInstalled, parseContacts } from "./lib/spark";
 
 export default function Contacts() {
   if (!isSparkInstalled()) return <SparkNotInstalled />;
+  return <ContactsView />;
+}
 
+function ContactsView() {
   const [query, setQuery] = useState("");
   const q = query.trim();
 

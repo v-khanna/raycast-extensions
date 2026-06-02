@@ -13,7 +13,10 @@ import { senderName, shorten, toRelative } from "./lib/format";
 
 export default function Search() {
   if (!isSparkInstalled()) return <SparkNotInstalled />;
+  return <SearchView />;
+}
 
+function SearchView() {
   const [query, setQuery] = useState("");
   const topic = query.trim();
 
