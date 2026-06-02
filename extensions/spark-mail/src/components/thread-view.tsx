@@ -9,7 +9,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getSparkPath,
   parseAttachments,
@@ -22,6 +22,7 @@ import { senderName, toRelative } from "../lib/format";
 export function ThreadView(props: { id: string; subject?: string }) {
   const { id, subject } = props;
   const [withAttachments, setWithAttachments] = useState(false);
+  const downloadToast = useRef<Toast | null>(null);
 
   const args = withAttachments
     ? ["thread", "--download-attachments", id]
@@ -30,7 +31,11 @@ export function ThreadView(props: { id: string; subject?: string }) {
     keepPreviousData: true,
   });
 
-  if (error) showFailureToast(error, { title: "Couldn't load thread" });
+  // A thread-load error: only surface it directly when we aren't mid-download
+  // (the download effect below owns the toast in that case, to avoid stacking).
+  if (error && !downloadToast.current) {
+    showFailureToast(error, { title: "Couldn't load thread" });
+  }
 
   const { summary, records } = useMemo(
     () => (data ? parseRecords(data) : { summary: {}, records: [] }),
@@ -41,6 +46,26 @@ export function ThreadView(props: { id: string; subject?: string }) {
     [data],
   );
   const downloaded = attachments.filter((a) => a.path);
+
+  // Resolve the "Downloading…" toast once the attachment-enabled refetch settles.
+  useEffect(() => {
+    const toast = downloadToast.current;
+    if (!toast || isLoading) return;
+    if (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Couldn't download attachments";
+    } else if (downloaded.length > 0) {
+      toast.style = Toast.Style.Success;
+      toast.title = `Downloaded ${downloaded.length} attachment${
+        downloaded.length > 1 ? "s" : ""
+      }`;
+    } else {
+      toast.style = Toast.Style.Failure;
+      toast.title = "No attachments were downloaded";
+    }
+    downloadToast.current = null;
+  }, [isLoading, error, downloaded.length]);
+
   const link = cleanLink(summary.link);
   const title = subject ?? summary.thread ?? summary.subject;
   const markdown = useMemo(
@@ -105,7 +130,7 @@ export function ThreadView(props: { id: string; subject?: string }) {
                   title={`Download ${attachments.length} Attachment${attachments.length > 1 ? "s" : ""}`}
                   icon={Icon.Download}
                   onAction={async () => {
-                    await showToast({
+                    downloadToast.current = await showToast({
                       style: Toast.Style.Animated,
                       title: "Downloading attachments…",
                     });

@@ -16,8 +16,8 @@
       "type": "textfield",
       "required": false,
       "title": "Spark CLI Path",
-      "description": "Absolute path to the spark binary. Find it with `which spark`.",
-      "default": "/usr/local/bin/spark"
+      "description": "Absolute path to the spark binary. Leave blank to auto-detect on PATH (/usr/local/bin, /opt/homebrew/bin). Find it with `which spark`.",
+      "placeholder": "/usr/local/bin/spark"
     }
   ],
   "commands": [
